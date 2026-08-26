@@ -8,15 +8,10 @@ st.set_page_config(page_title="Calculadora de Nash", layout="centered")
 # Encabezado principal con imagen y autoría
 col_img, col_tit = st.columns([1, 4])
 with col_img:
-    st.image(
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/John_Forbes_Nash%2C_Jr._by_Peter_Badge.jpg/360px-John_Forbes_Nash%2C_Jr._by_Peter_Badge.jpg",
-        caption="John F. Nash Jr.",
-        width=100
-    )
+    st.image("nash.jpg", caption="John F. Nash Jr.", width=110)
 with col_tit:
     st.title("Calculadora de Equilibrios de Nash")
     st.caption("Microeconomía III — Teoría de Juegos | Desarrollado por Santiago Agüero")
-
 st.markdown("Herramienta interactiva para resolver juegos estáticos en forma normal y determinar equilibrios en estrategias puras y mixtas.")
 
 # Configuración de dimensiones
