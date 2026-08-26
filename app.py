@@ -1,0 +1,107 @@
+import streamlit as st
+import numpy as np
+import nashpy as nash
+import pandas as pd
+
+st.set_page_config(page_title="Calculadora de Nash", page_icon="🎮", layout="centered")
+
+st.title("🎮 Calculadora de Teoría de Juegos: Equilibrios de Nash")
+st.markdown("Ingresa los pagos de cada jugador en la matriz para encontrar los equilibrios de Nash en estrategias puras y mixtas.")
+
+# Configuración de dimensiones
+col_dim1, col_dim2 = st.columns(2)
+with col_dim1:
+    filas = st.number_input("Número de Filas (Estrategias Jugador 1)", min_value=2, max_value=6, value=3, step=1)
+with col_dim2:
+    cols = st.number_input("Número de Columnas (Estrategias Jugador 2)", min_value=2, max_value=6, value=3, step=1)
+
+st.subheader("📊 Matriz de Pagos (Forma Normal)")
+st.caption("Escribe los pagos de cada casilla como: **pago1, pago2** (por ejemplo: `0, 4` o `6, 6`).")
+
+# Valores por defecto para matriz 3x3 de ejemplo
+default_vals = [
+    ["0, 4", "4, 0", "5, 3"],
+    ["4, 0", "0, 4", "5, 3"],
+    ["3, 5", "3, 5", "6, 6"]
+]
+
+# Crear grilla de casillas
+grid_inputs = []
+for i in range(filas):
+    cols_ui = st.columns(cols)
+    row_vals = []
+    for j in range(cols):
+        with cols_ui[j]:
+            def_val = default_vals[i][j] if i < 3 and j < 3 else "0, 0"
+            val = st.text_input(f"F{i+1}, C{j+1}", value=def_val, key=f"cell_{i}_{j}")
+            row_vals.append(val)
+    grid_inputs.append(row_vals)
+
+if st.button("🚀 Calcular Equilibrios de Nash", type="primary", use_container_width=True):
+    try:
+        # Parsear las matrices
+        A = np.zeros((filas, cols), dtype=float)
+        B = np.zeros((filas, cols), dtype=float)
+        
+        for i in range(filas):
+            for j in range(cols):
+                raw = grid_inputs[i][j].strip()
+                partes = [p.strip() for p in raw.split(",") if p.strip()]
+                if len(partes) != 2:
+                    st.error(f"Error en F{i+1}, C{j+1}: ingresa dos números separados por coma (ejemplo: 5, 3).")
+                    st.stop()
+                A[i, j] = float(partes[0])
+                B[i, j] = float(partes[1])
+        
+        juego = nash.Game(A, B)
+        equilibrios = list(juego.support_enumeration())
+        
+        st.divider()
+        st.subheader("🎯 Resultados del Análisis")
+        
+        if not equilibrios:
+            st.warning("No se encontraron equilibrios con el algoritmo estándar.")
+        else:
+            puros = []
+            mixtos = []
+            
+            for s_r, s_c in equilibrios:
+                es_pura_r = np.any(np.isclose(s_r, 1.0))
+                es_pura_c = np.any(np.isclose(s_c, 1.0))
+                
+                if es_pura_r and es_pura_c:
+                    f = int(np.argmax(s_r))
+                    c = int(np.argmax(s_c))
+                    puros.append((f + 1, c + 1, A[f, c], B[f, c]))
+                else:
+                    eu1 = s_r @ A @ s_c
+                    eu2 = s_r @ B @ s_c
+                    mixtos.append((s_r, s_c, eu1, eu2))
+            
+            # Mostrar equilibrios puros
+            if puros:
+                st.success(f"**Se encontraron {len(puros)} Equilibrio(s) de Nash en Estrategias PURAS:**")
+                for f, c, u1, u2 in puros:
+                    st.markdown(f"- 👉 **(Fila {f}, Columna {c})** con pagos **({u1:g}, {u2:g})**")
+            else:
+                st.info("ℹ️ No existen equilibrios de Nash en estrategias puras.")
+                
+            # Mostrar equilibrios mixtos
+            if mixtos:
+                st.markdown("### 🎲 Equilibrios en Estrategias MIXTAS:")
+                for idx, (s_r, s_c, eu1, eu2) in enumerate(mixtos, 1):
+                    with st.expander(f"Equilibrio Mixto #{idx}", expanded=True):
+                        col_m1, col_m2 = st.columns(2)
+                        with col_m1:
+                            st.write("**Probabilidades Jugador 1:**")
+                            df_j1 = pd.DataFrame({"Estrategia": [f"Fila {k+1}" for k in range(filas)], "Probabilidad": s_r})
+                            st.dataframe(df_j1, hide_index=True)
+                            st.write(f"**Pago esperado J1:** {eu1:.2f}")
+                        with col_m2:
+                            st.write("**Probabilidades Jugador 2:**")
+                            df_j2 = pd.DataFrame({"Estrategia": [f"Columna {k+1}" for k in range(cols)], "Probabilidad": s_c})
+                            st.dataframe(df_j2, hide_index=True)
+                            st.write(f"**Pago esperado J2:** {eu2:.2f}")
+                            
+    except Exception as e:
+        st.error(f"Ocurrió un error en el cálculo: {e}")
