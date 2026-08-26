@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 streamlit
 nashpy
 numpy
+=======
+streamlit
+nashpy
+numpy
+>>>>>>> 56f14464b4c4c746b2b9d64e06e43ef1ebe03941
 pandas

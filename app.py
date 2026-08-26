@@ -96,7 +96,7 @@ if st.button("Calcular Equilibrios", type="primary", use_container_width=True):
             else:
                 st.info("No existen equilibrios de Nash en estrategias puras.")
                 
-            # Mostrar equilibrios mixtos
+            # Mostrar mixtos
             if mixtos:
                 st.write("**Equilibrio(s) en Estrategias Mixtas:**")
                 for idx, (s_r, s_c, eu1, eu2) in enumerate(mixtos, 1):
