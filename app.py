@@ -11,7 +11,7 @@ with col_img:
     st.image("nash.jpg", caption="John F. Nash Jr.", width=110)
 with col_tit:
     st.title("Calculadora de Equilibrios de Nash")
-    st.caption("Microeconomía III — Teoría de Juegos | Desarrollado por Santiago Agüero")
+    st.caption("Desarrollado por Santiago Agüero")
 st.markdown("Herramienta interactiva para resolver juegos estáticos en forma normal y determinar equilibrios en estrategias puras y mixtas.")
 
 # Configuración de dimensiones
@@ -110,7 +110,3 @@ if st.button("Calcular Equilibrios", type="primary", use_container_width=True):
                             
     except Exception as e:
         st.error(f"Error en el cálculo: {e}")
-
-# Pie de página
-st.markdown("---")
-st.caption("Desarrollado para Microeconomía III · Facultad de Ciencias Económicas")
